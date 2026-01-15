@@ -8,7 +8,12 @@ class Database:
         url = settings.MONGO_URL
         masked_url = url.split("@")[-1] if "@" in url else "..." 
         print(f"Attempting to connect to MongoDB at: ...@{masked_url}")
-        self.client = AsyncIOMotorClient(url)
+        # Fix for Vercel SSL Error: TLSV1_ALERT_INTERNAL_ERROR
+        self.client = AsyncIOMotorClient(
+            url,
+            tls=True,
+            tlsAllowInvalidCertificates=True
+        )
         print("Connected to MongoDB client created")
 
     def disconnect(self):
