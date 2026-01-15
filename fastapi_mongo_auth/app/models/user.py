@@ -54,6 +54,11 @@ class UserBase(BaseModel):
     dob: str
     daily_goal_name: str = Field(..., description="Name of the daily goal (e.g., 'Water Intake', 'Steps')")
     daily_goal_target: str = Field(..., description="Target value for the daily goal (e.g., '2000', '100')")
+    
+    # Gamification
+    level: int = 1
+    current_xp: int = Field(default=0, alias="currentXp")
+    max_xp: int = Field(default=1000, alias="maxXp")
 
     @field_validator('mobile')
     @classmethod

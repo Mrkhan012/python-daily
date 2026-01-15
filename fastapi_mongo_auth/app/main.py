@@ -37,6 +37,8 @@ async def shutdown_db_client():
     db.disconnect()
 
 app.include_router(auth_routes.router)
+from app.routes import tracker_routes
+app.include_router(tracker_routes.router)
 
 @app.get("/")
 async def root():
