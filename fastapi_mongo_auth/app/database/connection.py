@@ -5,8 +5,11 @@ class Database:
     client: AsyncIOMotorClient = None
 
     def connect(self):
-        self.client = AsyncIOMotorClient(settings.MONGO_URL)
-        print("Connected to MongoDB")
+        url = settings.MONGO_URL
+        masked_url = url.split("@")[-1] if "@" in url else "..." 
+        print(f"Attempting to connect to MongoDB at: ...@{masked_url}")
+        self.client = AsyncIOMotorClient(url)
+        print("Connected to MongoDB client created")
 
     def disconnect(self):
         if self.client:
