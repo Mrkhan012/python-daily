@@ -19,6 +19,14 @@ class AuthController:
                     detail="User with this email already exists"
                 )
             
+            # Check if mobile already exists
+            existing_mobile = await self.collection.find_one({"mobile": user.mobile})
+            if existing_mobile:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User with this mobile number already exists"
+                )
+            
             # Prepare data
             hashed_password = get_password_hash(user.password)
             user_in_db = UserInDB(

@@ -51,7 +51,9 @@ class UserBase(BaseModel):
     email: EmailStr
     mobile: str
     city: str
-    dob: str  # Keeping as string for simplicity, or could be datetime
+    dob: str
+    daily_goal_name: str = Field(..., description="Name of the daily goal (e.g., 'Water Intake', 'Steps')")
+    daily_goal_target: str = Field(..., description="Target value for the daily goal (e.g., '2000', '100')")
 
     @field_validator('mobile')
     @classmethod
