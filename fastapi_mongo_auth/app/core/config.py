@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     DB_NAME: str = os.getenv("DB_NAME", "python-db")
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-key-change-it")
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 Days (30 * 24 * 60)
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     class Config:

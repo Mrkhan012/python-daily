@@ -61,7 +61,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), controller: Au
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        subject=user.email, expires_delta=access_token_expires
+        subject=user.email, 
+        expires_delta=access_token_expires,
+        extra_claims={
+            "id": str(user.id),
+            "name": f"{user.first_name} {user.last_name}",
+            "email": user.email,
+            "role": "user" # Example role
+        }
     )
     refresh_token = create_refresh_token(
         subject=user.email
@@ -70,7 +77,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), controller: Au
     return {
         "access_token": access_token, 
         "refresh_token": refresh_token, 
-        "token_type": "bearer"
+        "token_type": "Bearer"
     }
 
 # Alternative JSON login if preferred strictly over Form
@@ -91,7 +98,14 @@ async def login_json(user_login: UserLogin, controller: AuthController = Depends
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        subject=user.email, expires_delta=access_token_expires
+        subject=user.email, 
+        expires_delta=access_token_expires,
+        extra_claims={
+            "id": str(user.id),
+            "name": f"{user.first_name} {user.last_name}",
+            "email": user.email,
+            "role": "user"
+        }
     )
     refresh_token = create_refresh_token(
         subject=user.email
@@ -100,7 +114,7 @@ async def login_json(user_login: UserLogin, controller: AuthController = Depends
     return {
         "access_token": access_token, 
         "refresh_token": refresh_token, 
-        "token_type": "bearer"
+        "token_type": "Bearer"
     }
 
 @router.post(
@@ -131,7 +145,7 @@ async def refresh_token(refresh_token: str, db: AsyncIOMotorDatabase = Depends(g
     return {
         "access_token": access_token, 
         "refresh_token": new_refresh_token, 
-        "token_type": "bearer"
+        "token_type": "Bearer"
     }
 
 @router.get(
