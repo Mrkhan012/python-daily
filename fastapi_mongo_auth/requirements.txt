@@ -4,6 +4,7 @@ motor
 pydantic[email]
 pydantic-settings
 passlib[bcrypt]
+bcrypt==3.2.2
 python-jose[cryptography]
 python-multipart
 python-dotenv

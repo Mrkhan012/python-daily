@@ -4,10 +4,11 @@ from pydantic import BaseModel, EmailStr, Field
 from bson import ObjectId
 
 from typing import Any, Annotated
-from pydantic import BaseModel, EmailStr, Field, ConfigDict, GetJsonSchemaHandler
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, GetJsonSchemaHandler, field_validator
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema
 from bson import ObjectId
+import re
 
 class PyObjectId(str):
     @classmethod
@@ -52,8 +53,22 @@ class UserBase(BaseModel):
     city: str
     dob: str  # Keeping as string for simplicity, or could be datetime
 
+    @field_validator('mobile')
+    @classmethod
+    def validate_mobile(cls, v: str) -> str:
+        if not re.match(r'^\d{10}$', v):
+            raise ValueError('Mobile number must be exactly 10 digits')
+        return v
+
 class UserCreate(UserBase):
     password: str
+
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        return v
 
 class UserInDB(UserBase):
     id: Annotated[PyObjectId, Field(alias="_id", default=None)]
