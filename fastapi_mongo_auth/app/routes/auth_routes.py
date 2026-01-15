@@ -16,12 +16,33 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 def get_auth_controller(db: AsyncIOMotorDatabase = Depends(get_database)) -> AuthController:
     return AuthController(db)
 
-@router.post("/register", response_model=UserResponse)
+@router.post(
+    "/register", 
+    response_model=UserResponse, 
+    summary="Register a new user",
+    description="Creates a new user account with the provided details. Hashes the password before storage."
+)
 async def register(user: UserCreate, controller: AuthController = Depends(get_auth_controller)):
+    """
+    Register a new user with the following information:
+    
+    - **first_name**: User's first name
+    - **last_name**: User's last name
+    - **email**: Valid email address (must be unique)
+    - **mobile**: Mobile number
+    - **city**: User's city
+    - **dob**: Date of birth
+    - **password**: Strong password
+    """
     created_user = await controller.create_user(user)
     return created_user
 
-@router.post("/login", response_model=Token)
+@router.post(
+    "/login", 
+    response_model=Token,
+    summary="Login for access token",
+    description="Authenticate user with email (username) and password to obtain an OAuth2 access token."
+)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), controller: AuthController = Depends(get_auth_controller)):
     # Note: OAuth2PasswordRequestForm expects username, so we map email to it if needed or use custom body
     # Standard OAuth2 uses 'username' and 'password' form fields.
@@ -53,7 +74,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), controller: Au
     }
 
 # Alternative JSON login if preferred strictly over Form
-@router.post("/login/json", response_model=Token)
+@router.post(
+    "/login/json", 
+    response_model=Token,
+    summary="Login with JSON body",
+    description="Alternative login endpoint accepting a JSON body instead of form data."
+)
 async def login_json(user_login: UserLogin, controller: AuthController = Depends(get_auth_controller)):
     user = await controller.authenticate_user(user_login.email, user_login.password)
     if not user:
@@ -77,7 +103,12 @@ async def login_json(user_login: UserLogin, controller: AuthController = Depends
         "token_type": "bearer"
     }
 
-@router.post("/refresh", response_model=Token)
+@router.post(
+    "/refresh", 
+    response_model=Token,
+    summary="Refresh access token",
+    description="Get a new access token using a valid refresh token."
+)
 async def refresh_token(refresh_token: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     try:
         payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -103,6 +134,15 @@ async def refresh_token(refresh_token: str, db: AsyncIOMotorDatabase = Depends(g
         "token_type": "bearer"
     }
 
-@router.get("/me", response_model=UserResponse)
+@router.get(
+    "/me", 
+    response_model=UserResponse,
+    summary="Get current user",
+    description="Retrieve details of the currently authenticated user."
+)
 async def read_users_me(current_user: UserInDB = Depends(get_current_user)):
+    """
+    Returns the user object for the authenticated user context.
+    Requires a valid Bearer token in the Authorization header.
+    """
     return current_user
