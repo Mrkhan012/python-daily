@@ -7,7 +7,7 @@ from app.database.connection import get_database
 from app.controllers.tracker_controller import TrackerController
 from app.models.user import UserInDB, UserResponse
 from app.models.habit import HabitCreate, HabitResponse
-from app.models.log import LogCreate, LogResponse
+from app.models.log import LogBase, LogCreate, LogResponse
 from app.core.deps import get_current_user
 
 router = APIRouter(tags=["Tracker"])
@@ -58,7 +58,7 @@ async def get_today_log(
 ):
     return await controller.get_today_log(str(current_user.id))
 
-@router.get("/logs/history", response_model=List[LogResponse])
+@router.get("/logs/history", response_model=List[LogBase])
 async def get_log_history(
     startDate: str = Query(..., description="Start date (YYYY-MM-DD)"),
     endDate: str = Query(..., description="End date (YYYY-MM-DD)"),

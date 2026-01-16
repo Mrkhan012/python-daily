@@ -1,10 +1,10 @@
-from datetime import date
+from datetime import date, timedelta
 from typing import List, Optional
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
 from fastapi import HTTPException, status
 from app.models.habit import HabitCreate, HabitInDB, HabitResponse
-from app.models.log import LogCreate, LogInDB, LogResponse
+from app.models.log import LogBase, LogCreate, LogInDB, LogResponse
 from app.models.user import UserInDB
 
 class TrackerController:
@@ -76,15 +76,38 @@ class TrackerController:
             )
         return LogResponse(**log)
 
-    async def get_log_history(self, user_id: str, start_date: str, end_date: str) -> List[LogResponse]:
-        # Basic string comparison helper for date range
-        logs = []
-        async for log in self.logs_collection.find({
+    async def get_log_history(self, user_id: str, start_date: str, end_date: str) -> List[LogBase]:
+        start = date.fromisoformat(start_date)
+        end = date.fromisoformat(end_date)
+        
+        # Fetch existing logs
+        cursor = self.logs_collection.find({
             "userId": ObjectId(user_id),
             "date": {"$gte": start_date, "$lte": end_date}
-        }).sort("date", 1): # Sort by date ascending
-            logs.append(LogResponse(**log))
-        return logs
+        })
+        
+        existing_logs = {}
+        async for log in cursor:
+            existing_logs[log["date"]] = log
+            
+        history = []
+        current = start
+        while current <= end:
+            current_str = current.isoformat()
+            if current_str in existing_logs:
+                # Use existing data
+                history.append(LogBase(**existing_logs[current_str]))
+            else:
+                # Fill gap with zero values
+                history.append(LogBase(
+                    date=current_str,
+                    steps=0,
+                    waterMl=0,
+                    proteinG=0
+                ))
+            current += timedelta(days=1)
+            
+        return history
 
     async def sync_log(self, user_id: str, log_data: LogCreate) -> LogResponse:
         # Upsert: Update if exists, Insert if not
